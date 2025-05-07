@@ -7,12 +7,19 @@
     "icon": "./assets/images/icon.png",
     "scheme": "client",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "ios": {
+      "config": {
+        "googleMapsApiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
+      },
       "supportsTablet": true,
       "bundleIdentifier": "com.serenewalk.app"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

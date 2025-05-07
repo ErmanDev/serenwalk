@@ -229,7 +229,10 @@ export default function HomePage() {
               SOS
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => router.push('/app/navigation')}
+          >
             <Ionicons
               name="compass"
               size={24}
