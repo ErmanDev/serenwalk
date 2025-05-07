@@ -10,10 +10,7 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.serenewalk.app",
-      "config": {
-        "googleMapsApiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
-      }
+      "bundleIdentifier": "com.serenewalk.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,12 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.serenewalk.app",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
-        }
-      }
+      "package": "com.serenewalk.app"
     },
     "web": {
       "bundler": "metro",
@@ -48,12 +40,6 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
-        }
-      ],
-      [
-        "react-native-maps",
-        {
-          "googleMapsApiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
         }
       ]
     ],
