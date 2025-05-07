@@ -60,7 +60,7 @@ export default function SignupScreen() {
 
       if (response.ok) {
         Alert.alert('Success', 'Sign-up successful');
-        router.push('/login');
+        router.push('/app/login');
       } else {
         Alert.alert('Error', data.error || 'Sign-up failed');
       }
@@ -132,7 +132,7 @@ export default function SignupScreen() {
 
       <Text style={styles.footerText}>
         Already a member?{' '}
-        <Text style={styles.link} onPress={() => router.push('/login')}>
+        <Text style={styles.link} onPress={() => router.push('/app/login')}>
           Log in
         </Text>
       </Text>

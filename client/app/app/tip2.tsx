@@ -14,7 +14,7 @@ const Tip1 = () => {
       <View style={[styles.headerWrapper, { backgroundColor: isDarkMode ? '#444' : '#d63384' }]}>
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.push('safetytips')}
+            onPress={() => router.push('/app/safetytips')}
             style={styles.backButton}
           >
             <MaterialIcons 
@@ -55,7 +55,7 @@ const Tip2 = () => {
       <View style={[styles.headerWrapper, isDarkMode && { backgroundColor: '#333' }]}>
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.push('safetytips')}
+            onPress={() => router.push('/app/safetytips')}
             style={styles.backButton}
           >
             <MaterialIcons 

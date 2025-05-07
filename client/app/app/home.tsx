@@ -50,7 +50,7 @@ export default function HomePage() {
     try {
       await AsyncStorage.removeItem('accessToken');
       Alert.alert('Logged out', 'You have been logged out successfully.');
-      router.push('/login');
+      router.push('app/login');
     } catch (error) {
       console.error('Error during logout:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -103,7 +103,7 @@ export default function HomePage() {
               <View style={styles.cardContainer}>
                 <TouchableOpacity
                   style={styles.card}
-                  onPress={() => router.push('/sos')}
+                  onPress={() => router.push('app/sos')}
                 >
                   <Image
                     source={require('@/assets/images/siren.png')}
@@ -116,7 +116,7 @@ export default function HomePage() {
               <View style={styles.cardContainer}>
                 <TouchableOpacity
                   style={styles.card}
-                  onPress={() => router.push('/navigation')}
+                  onPress={() => router.push('app/navigation')}
                 >
                   <Image
                     source={require('@/assets/images/maps.png')}
@@ -203,7 +203,7 @@ export default function HomePage() {
         >
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('/home')}
+            onPress={() => router.push('/app/home')}
           >
             <Ionicons
               name="home"
@@ -218,7 +218,7 @@ export default function HomePage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('/sos')}
+            onPress={() => router.push('/app/sos')}
           >
             <MaterialIcons
               name="sos"
@@ -241,7 +241,7 @@ export default function HomePage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('/safetytips')}
+            onPress={() => router.push('app/safetytips')}
           >
             <Ionicons
               name="bulb"
@@ -254,7 +254,7 @@ export default function HomePage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('/profile')}
+            onPress={() => router.push('app/profile')}
           >
             <Ionicons
               name="person"

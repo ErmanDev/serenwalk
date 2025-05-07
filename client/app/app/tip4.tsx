@@ -12,7 +12,7 @@ const Tip1 = () => {
       <View style={styles.headerWrapper}>
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.push('safetytips')}
+            onPress={() => router.push('/app/safetytips')}
             style={styles.backButton}
           >
             <MaterialIcons 
