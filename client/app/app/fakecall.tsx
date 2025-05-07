@@ -11,18 +11,66 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../app/constants/ThemeContext';
+import { Audio } from 'expo-av';
 
 export default function FakeCallScreen() {
   const router = useRouter();
   const { isDarkMode } = useTheme();
   const [callDuration, setCallDuration] = useState(0);
   const [isCallActive, setIsCallActive] = useState(true);
+  const [isRinging, setIsRinging] = useState(true);
+  const [showTimer, setShowTimer] = useState(false);
   const pulseAnim = new Animated.Value(1);
+  const ringAnim = new Animated.Value(0);
+  const [ringtoneSound, setRingtoneSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
-    // Start call timer
+    // Start ringing animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(ringAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ringAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Play ringtone
+    const playRingtone = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require('@/assets/audio/sos.mp3'),
+          { shouldPlay: true, isLooping: true }
+        );
+        setRingtoneSound(sound);
+        await sound.playAsync();
+
+        // After 4 seconds, stop ringing and show timer
+        setTimeout(async () => {
+          if (sound) {
+            await sound.stopAsync();
+            await sound.unloadAsync();
+            setRingtoneSound(null);
+          }
+          setIsRinging(false);
+          setShowTimer(true);
+        }, 4000);
+      } catch (error) {
+        console.error('Error playing ringtone:', error);
+      }
+    };
+
+    playRingtone();
+
+    // Start call timer after ringing
     const timer = setInterval(() => {
-      if (isCallActive) {
+      if (isCallActive && showTimer) {
         setCallDuration((prev) => prev + 1);
       }
     }, 1000);
@@ -43,8 +91,15 @@ export default function FakeCallScreen() {
       ])
     ).start();
 
-    return () => clearInterval(timer);
-  }, [isCallActive]);
+    // Cleanup function
+    return () => {
+      clearInterval(timer);
+      if (ringtoneSound) {
+        ringtoneSound.stopAsync();
+        ringtoneSound.unloadAsync();
+      }
+    };
+  }, [isCallActive, showTimer]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -54,7 +109,11 @@ export default function FakeCallScreen() {
       .padStart(2, '0')}`;
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
+    if (ringtoneSound) {
+      await ringtoneSound.stopAsync();
+      await ringtoneSound.unloadAsync();
+    }
     setIsCallActive(false);
     router.back();
   };
@@ -68,7 +127,17 @@ export default function FakeCallScreen() {
           style={[
             styles.avatarContainer,
             {
-              transform: [{ scale: pulseAnim }],
+              transform: [
+                { scale: pulseAnim },
+                {
+                  translateX: isRinging
+                    ? ringAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-5, 5],
+                      })
+                    : 0,
+                },
+              ],
             },
           ]}
         >
@@ -82,11 +151,17 @@ export default function FakeCallScreen() {
           911
         </Text>
         <Text style={[styles.callStatus, isDarkMode && { color: '#ccc' }]}>
-          {isCallActive ? 'Calling...' : 'Call ended'}
+          {isRinging
+            ? 'Ringing...'
+            : isCallActive
+            ? 'Call in progress'
+            : 'Call ended'}
         </Text>
-        <Text style={[styles.callDuration, isDarkMode && { color: '#ccc' }]}>
-          {formatTime(callDuration)}
-        </Text>
+        {showTimer && (
+          <Text style={[styles.callDuration, isDarkMode && { color: '#ccc' }]}>
+            {formatTime(callDuration)}
+          </Text>
+        )}
 
         <View style={styles.controls}>
           <TouchableOpacity
@@ -120,6 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#DA549B',
   },
   avatar: {
     width: 100,
@@ -130,16 +207,16 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#000',
+    color: '#DA549B',
   },
   callStatus: {
     fontSize: 18,
-    color: '#666',
+    color: '#374151',
     marginBottom: 8,
   },
   callDuration: {
     fontSize: 16,
-    color: '#666',
+    color: '#374151',
     marginBottom: 40,
   },
   controls: {
@@ -154,9 +231,14 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
   },
   endCallButton: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#DA549B',
     transform: [{ rotate: '135deg' }],
   },
 });
