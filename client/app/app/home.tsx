@@ -106,17 +106,17 @@ export default function HomePage() {
                   onPress={() => router.push('app/sos')}
                 >
                   <Image
-                    source={require('@/assets/images/siren.png')}
+                    source={require('@/assets/images/fakecall.png')}
                     style={styles.imageIcon}
                   />
-                  <Text style={styles.cardText}>SOS Alert</Text>
+                  <Text style={styles.cardText}>Emergency Call</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.cardContainer}>
                 <TouchableOpacity
                   style={styles.card}
-                  onPress={() => router.push('app/navigation')}
+                  onPress={() => router.push('/app/navigation')}
                 >
                   <Image
                     source={require('@/assets/images/maps.png')}
