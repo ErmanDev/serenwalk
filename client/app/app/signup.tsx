@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl; // Use environment variable for API URL
+const API_URL = 'https://serenwalk.onrender.com';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <Text style={styles.title}>Let’s sign you up.</Text>
+      <Text style={styles.title}>Let's sign you up.</Text>
       <Text style={styles.subtitle}>Welcome.</Text>
 
       <Text style={styles.label}>Full Name</Text>

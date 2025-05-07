@@ -11,9 +11,8 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl;
+const API_URL = 'https://serenwalk.onrender.com';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -40,17 +39,42 @@ export default function LoginScreen() {
     if (email && password) {
       try {
         console.log('Attempting login with:', { email, password }); // Debugging log
+        console.log('Making request to:', `${API_URL}/api/users/login`); // Log the full URL
+
         const response = await fetch(`${API_URL}/api/users/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
           body: JSON.stringify({ email, password }),
         });
 
         console.log('Response status:', response.status); // Debugging log
-        const data = await response.json();
-        console.log('Response data:', data); // Debugging log
+        console.log(
+          'Response headers:',
+          JSON.stringify(Object.fromEntries(response.headers.entries()))
+        ); // Log response headers
 
-        if (response.ok) {
+        const responseText = await response.text(); // Get raw response text
+        console.log('Raw response:', responseText); // Log raw response
+
+        if (!response.ok) {
+          throw new Error(
+            `Server responded with status ${response.status}: ${responseText}`
+          );
+        }
+
+        let data;
+        try {
+          data = JSON.parse(responseText); // Try to parse as JSON
+        } catch (parseError) {
+          console.error('JSON Parse error:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error('Server returned invalid JSON response');
+        }
+
+        if (data.accessToken) {
           await AsyncStorage.setItem('accessToken', data.accessToken);
           if (data.user?.fullName)
             await AsyncStorage.setItem('userName', data.user.fullName);
@@ -60,13 +84,16 @@ export default function LoginScreen() {
           if (data.user?.profileUrl)
             await AsyncStorage.setItem('profileImage', data.user.profileUrl);
           Alert.alert('Logged in successfully!', `Welcome back, ${email}`);
-          router.push('/home');
+          router.push('/app/home');
         } else {
-          Alert.alert('Error', data.error || 'Login failed');
+          throw new Error('No access token in response');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Login error:', error); // Debugging log
-        Alert.alert('Error', 'Something went wrong. Please try again.');
+        Alert.alert(
+          'Error',
+          error.message || 'Something went wrong. Please try again.'
+        );
       }
     } else {
       Alert.alert('Error', 'Please enter both email and password');
@@ -77,7 +104,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      <Text style={styles.title}>Let's sign you in.</Text>
+      <Text style={styles.title}>Let&apos;s sign you in.</Text>
       <Text style={styles.subtitle}>Welcome back.</Text>
 
       {/* Email Field */}
@@ -136,7 +163,7 @@ export default function LoginScreen() {
 
       <Text style={styles.footerText}>
         Are you new here?{' '}
-        <Text style={styles.link} onPress={() => router.push('/signup')}>
+        <Text style={styles.link} onPress={() => router.push('/app/signup')}>
           Sign up
         </Text>
       </Text>

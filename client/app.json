@@ -7,21 +7,31 @@
     "icon": "./assets/images/icon.png",
     "scheme": "client",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.serenewalk.app",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.serenewalk.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/images/favicon.png"
+      "favicon": "../client/assets/images/images/favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -33,10 +43,25 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "googleMapsApiKey": "AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiUrl": "https://serenwalk.onrender.com"
     }
   }
 }
