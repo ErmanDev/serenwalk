@@ -103,7 +103,7 @@ export default function HomePage() {
               <View style={styles.cardContainer}>
                 <TouchableOpacity
                   style={styles.card}
-                  onPress={() => router.push('app/sos')}
+                  onPress={() => router.push('/app/fakecall')}
                 >
                   <Image
                     source={require('@/assets/images/fakecall.png')}
