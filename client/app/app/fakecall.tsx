@@ -45,22 +45,34 @@ export default function FakeCallScreen() {
     const playRingtone = async () => {
       try {
         const { sound } = await Audio.Sound.createAsync(
-          require('@/assets/audio/sos.mp3'),
+          require('@/assets/audio/ring.mp3'),
           { shouldPlay: true, isLooping: true }
         );
         setRingtoneSound(sound);
         await sound.playAsync();
 
         // After 4 seconds, stop ringing and show timer
-        setTimeout(async () => {
-          if (sound) {
-            await sound.stopAsync();
-            await sound.unloadAsync();
-            setRingtoneSound(null);
+        const timeout = setTimeout(async () => {
+          if (isCallActive) {
+            if (sound) {
+              await sound.stopAsync();
+              await sound.unloadAsync();
+              setRingtoneSound(null);
+            }
+            setIsRinging(false);
+            setShowTimer(true);
           }
-          setIsRinging(false);
-          setShowTimer(true);
         }, 4000);
+
+        // Stop sound immediately if call is in progress
+        if (!isRinging && isCallActive && sound) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+          setRingtoneSound(null);
+        }
+
+        // Cleanup timeout if the component unmounts or call ends early
+        return () => clearTimeout(timeout);
       } catch (error) {
         console.error('Error playing ringtone:', error);
       }
@@ -68,7 +80,6 @@ export default function FakeCallScreen() {
 
     playRingtone();
 
-    // Start call timer after ringing
     const timer = setInterval(() => {
       if (isCallActive && showTimer) {
         setCallDuration((prev) => prev + 1);
