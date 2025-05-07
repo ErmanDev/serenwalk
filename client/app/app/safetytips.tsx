@@ -101,7 +101,7 @@ const SafetyTips = () => {
       >
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/home')}
+          onPress={() => router.push('/app/home')}
         >
           <Ionicons
             name="home"
@@ -114,7 +114,7 @@ const SafetyTips = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/sos')}
+          onPress={() => router.push('/app/sos')}
         >
           <MaterialIcons
             name="sos"
@@ -137,7 +137,7 @@ const SafetyTips = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/safetytips')}
+          onPress={() => router.push('/app/safetytips')}
         >
           <Ionicons
             name="bulb"
@@ -152,7 +152,7 @@ const SafetyTips = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/profile')}
+          onPress={() => router.push('/app/profile')}
         >
           <Ionicons
             name="person"
