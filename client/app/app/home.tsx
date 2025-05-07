@@ -50,7 +50,7 @@ export default function HomePage() {
     try {
       await AsyncStorage.removeItem('accessToken');
       Alert.alert('Logged out', 'You have been logged out successfully.');
-      router.push('app/login');
+      router.push('/app/login');
     } catch (error) {
       console.error('Error during logout:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -241,7 +241,7 @@ export default function HomePage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('app/safetytips')}
+            onPress={() => router.push('/app/safetytips')}
           >
             <Ionicons
               name="bulb"
@@ -254,7 +254,7 @@ export default function HomePage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
-            onPress={() => router.push('app/profile')}
+            onPress={() => router.push('/app/profile')}
           >
             <Ionicons
               name="person"

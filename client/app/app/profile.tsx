@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 
-import { useTheme } from '../app/constants/ThemeContext'
+import { useTheme } from '../app/constants/ThemeContext';
 export default function SettingsScreen() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [isPushEnabled, setIsPushEnabled] = useState(false);
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
       await AsyncStorage.removeItem('userEmail');
       await AsyncStorage.removeItem('profileImage');
       await AsyncStorage.removeItem('userId');
-      router.push('/login');
+      router.push('/app/login');
     } catch (error) {
       console.error('Error during logout:', error);
       Alert.alert('Error', 'Failed to logout. Please try again.');
