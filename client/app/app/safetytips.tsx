@@ -57,7 +57,7 @@ const SafetyTips = () => {
   const { isDarkMode } = useTheme();
 
   const handlePress = (TipId: number) => {
-    router.push(`/tip${TipId}`);
+    router.push(`/app/tip${TipId}`); // Updated to match the expected route format
   };
 
   return (
@@ -125,7 +125,10 @@ const SafetyTips = () => {
             SOS
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/app/navigation')}
+        >
           <Ionicons
             name="compass"
             size={24}
