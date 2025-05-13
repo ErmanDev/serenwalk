@@ -25,7 +25,7 @@ export default function SettingsScreen() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const API_URL = 'https://serenwalk.onrender.com';
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -88,7 +88,7 @@ export default function SettingsScreen() {
       try {
         const accessToken = await AsyncStorage.getItem('accessToken');
         const response = await fetch(
-          'http://192.168.1.38:5000/api/users/profile-image',
+          `${API_URL}/api/users/profile-image`,
           {
             method: 'PUT',
             headers: {
@@ -226,25 +226,27 @@ export default function SettingsScreen() {
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/home')}
+          onPress={() => router.push('/app/home')}
         >
           <Ionicons name="home" size={24} color="gray" />
           <Text style={styles.navTextActive}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/sos')}
+          onPress={() => router.push('/app/sos')}
         >
           <MaterialIcons name="sos" size={24} color="gray" />
           <Text style={styles.navText}>SOS</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem}
+        onPress={() => router.push('/app/navigation')}
+        >
           <Ionicons name="compass" size={24} color="gray" />
           <Text style={styles.navText}>Explore</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/safetytips')}
+          onPress={() => router.push('/app/safetytips')}
         >
           <Ionicons name="bulb" size={24} color="gray" />
           <Text style={styles.navText}>Tips</Text>

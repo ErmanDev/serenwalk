@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "client",
-    "slug": "client",
+    "slug": "serenewalk",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -25,7 +25,11 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.serenewalk.app"
+      "package": "com.serenewalk.app",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -54,7 +58,12 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "https://serenwalk.onrender.com"
-    }
+      "apiUrl": "https://serenwalk.onrender.com",
+      "router": {},
+      "eas": {
+        "projectId": "bdf41654-b252-4e5d-a5f7-1ee6c94e9e5d"
+      }
+    },
+    "owner": "narraarran"
   }
 }

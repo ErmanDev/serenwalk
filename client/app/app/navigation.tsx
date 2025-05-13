@@ -16,8 +16,8 @@ import { useRouter } from 'expo-router';
 export default function App() {
   const router = useRouter();
   const [showGuide, setShowGuide] = useState(false);
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-600)).current;
 
@@ -25,6 +25,7 @@ export default function App() {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Permission to access location was denied');
+      console.error('Permission to access location was denied', errorMsg);
       Alert.alert(
         'Location Permission',
         'Permission to access location was denied.'
@@ -126,6 +127,14 @@ export default function App() {
         <Ionicons name="search" size={24} color="#fff" />
       </TouchableOpacity>
 
+      {/* Search Location Button */}
+      <TouchableOpacity
+        style={styles.searchLocationButton}
+        onPress={handleSearchLocation}
+      >
+        <Ionicons name="locate" size={24} color="#fff" />
+      </TouchableOpacity>
+
       {showGuide && (
         <View style={styles.guideLabel}>
           <View style={styles.guideItem}>
@@ -206,6 +215,15 @@ const styles = StyleSheet.create({
   searchButtonLeft: {
     position: 'absolute',
     top: 30,
+    left: 20,
+    backgroundColor: '#DA549B',
+    borderRadius: 50,
+    padding: 10,
+    elevation: 5,
+  },
+  searchLocationButton: {
+    position: 'absolute',
+    top: 80,
     left: 20,
     backgroundColor: '#DA549B',
     borderRadius: 50,

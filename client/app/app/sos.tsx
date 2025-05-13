@@ -200,7 +200,7 @@ export default function SosScreen() {
       >
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('app/home')}
+          onPress={() => router.push('/app/home')}
         >
           <Ionicons
             name="home"
@@ -213,7 +213,7 @@ export default function SosScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('app/sos')}
+          onPress={() => router.push('/app/sos')}
         >
           <MaterialIcons
             name="sos"
@@ -226,7 +226,10 @@ export default function SosScreen() {
             SOS
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/app/navigation')}
+        >
           <Ionicons
             name="compass"
             size={24}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -53,7 +53,7 @@ export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const router = useRouter();
-  const fadeAnim = new Animated.Value(1);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,11 +75,11 @@ export default function App() {
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [isLoading, isAutoScrolling]);
+  }, [isLoading, isAutoScrolling, fadeAnim]);
 
-  const handleNavigation = (screen: 'login' | 'signup') => {
+  const handleNavigation = (screen: '/app/login' | '/app/signup') => {
     try {
-      router.navigate(screen as any);
+      router.navigate(screen);
     } catch (error) {
       console.error('Navigation error:', error);
     }
