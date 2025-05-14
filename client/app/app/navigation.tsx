@@ -332,8 +332,6 @@ export default function App() {
             const distance = R * c;
 
             inside = distance <= radius;
-
-            setDebugInfo(`In Zone ${matchedZone.id}, distance: ${distance}`);
           }
 
           return (
@@ -502,9 +500,6 @@ export default function App() {
           <Ionicons name="person" size={24} color="gray" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
-      </View>
-      <View style={styles.debugOverlay}>
-        <Text style={styles.debugText}>{debugInfo}</Text>
       </View>
     </View>
   );
