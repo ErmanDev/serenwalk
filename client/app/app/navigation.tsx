@@ -19,7 +19,7 @@ const DESTINATION = {
   longitude: 121.04974424012727,
 };
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4'; // Replace if needed
+const GOOGLE_MAPS_APIKEY = 'AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4';
 
 export default function App() {
   const router = useRouter();
@@ -260,15 +260,29 @@ export default function App() {
           { transform: [{ translateX: slideAnim }] },
         ]}
       >
-        <TextInput
-          style={styles.textInput}
-          placeholder="Enter location"
-          value={searchText}
-          onChangeText={(text) => {
-            setSearchText(text);
-            fetchSuggestions(text);
-          }}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter location"
+            value={searchText}
+            onChangeText={(text) => {
+              setSearchText(text);
+              fetchSuggestions(text);
+            }}
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => {
+                setSearchText('');
+                setSuggestions([]);
+              }}
+            >
+              <Ionicons name="close" size={18} color="#888" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {suggestions.map((item) => (
           <TouchableOpacity
             key={item.place_id}
@@ -397,6 +411,8 @@ const styles = StyleSheet.create({
     width: 250,
   },
   textInput: {
+    flex: 1,
+    color: '#000',
     height: 40,
     backgroundColor: '#fff',
     borderColor: '#ccc',
@@ -469,5 +485,23 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
+  },
+
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    position: 'relative',
+  },
+
+  clearButton: {
+    position: 'absolute',
+    right: 10,
+    padding: 4,
+    zIndex: 10,
   },
 });

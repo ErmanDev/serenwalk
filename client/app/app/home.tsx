@@ -109,7 +109,7 @@ export default function HomePage() {
                     source={require('@/assets/images/fakecall.png')}
                     style={styles.imageIcon}
                   />
-                  <Text style={styles.cardText}>Emergency Call</Text>
+                  <Text style={styles.cardText}>Fake Call</Text>
                 </TouchableOpacity>
               </View>
 
