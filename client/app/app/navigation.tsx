@@ -53,7 +53,7 @@ export default function App() {
 
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
       input
-    )}&key=${GOOGLE_MAPS_APIKEY}`;
+    )}&components=country:ph&key=${GOOGLE_MAPS_APIKEY}`;
 
     try {
       const res = await fetch(url);
@@ -145,40 +145,6 @@ export default function App() {
         });
       }
     );
-  };
-
-  const handleDestinationSearch = async (address: string) => {
-    const hasPermission = await requestLocationPermission();
-    if (!hasPermission || !address) return;
-
-    try {
-      const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        address
-      )}&key=${GOOGLE_MAPS_APIKEY}`;
-      const geoRes = await fetch(geoUrl);
-      const geoJson = await geoRes.json();
-
-      if (!geoJson.results.length) {
-        Alert.alert('Location not found');
-        return;
-      }
-
-      const dest = geoJson.results[0].geometry.location;
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-
-      await getRouteDirections(
-        currentLocation.coords.latitude,
-        currentLocation.coords.longitude,
-        dest.lat,
-        dest.lng
-      );
-
-      followUser();
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      Alert.alert('Failed to find location');
-    }
   };
 
   const handleSearchLocation = async () => {

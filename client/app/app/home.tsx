@@ -388,13 +388,13 @@ const styles = StyleSheet.create({
   journeyTitle: {
     fontWeight: 'bold',
     fontSize: 16,
-    color: '#1f2937', // dark text
+    color: '#1f2937', 
     marginBottom: 4,
   },
 
   journeySub: {
     fontSize: 13,
-    color: '#6b7280', // gray text
+    color: '#6b7280', 
   },
 
   services: {
