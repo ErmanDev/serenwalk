@@ -45,7 +45,7 @@ export default function FakeCallScreen() {
     const playRingtone = async () => {
       try {
         const { sound } = await Audio.Sound.createAsync(
-          require('@/assets/audio/ring.mp3'),
+          require('@/assets/audio/iphone.mp3'),
           { shouldPlay: true, isLooping: true }
         );
         setRingtoneSound(sound);
