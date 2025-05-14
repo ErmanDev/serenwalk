@@ -195,15 +195,13 @@ export default function App() {
 
       mapRef.current?.animateCamera({
         center: {
-          latitude: 14.667931024530539,
-          longitude: 121.05661536249706,
+          latitude: DESTINATION.latitude,
+          longitude: DESTINATION.longitude,
         },
         zoom: 17,
         pitch: 0,
         heading: 0,
       });
-
-      followUser();
     };
 
     initializeMap();
