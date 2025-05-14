@@ -191,17 +191,18 @@ export default function App() {
 
       const currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
-      setRouteCoords([]); // Clear any initial polyline
+      setRouteCoords([]);
 
       mapRef.current?.animateCamera({
         center: {
-          latitude: 14.667608021099888,
-          longitude: 121.05798623633218,
+          latitude: 14.667931024530539,
+          longitude: 121.05661536249706,
         },
         zoom: 17,
         pitch: 0,
         heading: 0,
       });
+
       followUser();
     };
 
