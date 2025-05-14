@@ -260,6 +260,12 @@ export default function App() {
         showsUserLocation={true}
         followsUserLocation={false}
         onPanDrag={() => setIsMapTouched(true)}
+        initialRegion={{
+          latitude: 14.672715587849698,
+          longitude: 121.04974424012727,
+          latitudeDelta: 0.002,
+          longitudeDelta: 0.002,
+        }}
       >
         {location && (
           <Marker
