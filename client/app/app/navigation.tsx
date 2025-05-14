@@ -152,7 +152,6 @@ export default function App() {
             longitude: loc.coords.longitude,
           },
           pitch: 0,
-          zoom: 18,
         });
       }
     );
@@ -252,8 +251,8 @@ export default function App() {
             longitude: 121.0566681907873,
           }}
           radius={120} // adjust as needed
-          strokeColor="rgba(0, 0, 255, 0.5)" // blue border
-          fillColor="rgba(0, 0, 255, 0.2)" // blue fill
+          strokeColor="rgba(0, 0, 255, 0.5)"
+          fillColor="rgba(0, 0, 255, 0.2)"
         />
 
         {routeCoords.length > 0 && (
