@@ -9,10 +9,12 @@ import {
   Alert,
   Animated,
   TextInput,
+  Vibration,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import PolylineDecoder from 'polyline';
+import Toast from 'react-native-root-toast';
 
 const DESTINATION = {
   latitude: 14.672715587849698,
@@ -35,6 +37,32 @@ export default function App() {
   const [searchText, setSearchText] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const locationWatcher = useRef<Location.LocationSubscription | null>(null);
+  const [isMapTouched, setIsMapTouched] = useState(false);
+  const hasAlertedZone = useRef<{ [key: string]: boolean }>({});
+  const [debugInfo, setDebugInfo] = useState<string>('');
+
+  const isInsideRadius = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+    radius: number
+  ) => {
+    const R = 6371e3; // metres
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // in meters
+
+    return d <= radius;
+  };
 
   const requestLocationPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -146,13 +174,16 @@ export default function App() {
       },
       (loc) => {
         setLocation(loc);
-        mapRef.current?.animateCamera({
-          center: {
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          },
-          pitch: 0,
-        });
+
+        if (!isMapTouched) {
+          mapRef.current?.animateCamera({
+            center: {
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            },
+            pitch: 0,
+          });
+        }
       }
     );
   };
@@ -183,11 +214,26 @@ export default function App() {
       }).start();
     }
   };
+  const handleZoneAlert = (
+    zoneId: string,
+    title: string,
+    isInside: boolean
+  ) => {
+    if (isInside && !hasAlertedZone.current[zoneId]) {
+      hasAlertedZone.current[zoneId] = true;
+      Alert.alert('Alert', title);
+      Vibration.vibrate([500, 300, 500]);
+    } else if (!isInside && hasAlertedZone.current[zoneId]) {
+      hasAlertedZone.current[zoneId] = false;
+    }
+  };
 
   useEffect(() => {
     const initializeMap = async () => {
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) return;
+
+      Vibration.vibrate([500, 300, 500]);
 
       const currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
@@ -198,14 +244,12 @@ export default function App() {
           latitude: DESTINATION.latitude,
           longitude: DESTINATION.longitude,
         },
-        zoom: 17,
+
         pitch: 0,
         heading: 0,
       });
     };
-
-    initializeMap();
-  }, []);
+  }, [requestLocationPermission]);
 
   return (
     <View style={styles.container}>
@@ -214,7 +258,8 @@ export default function App() {
         provider="google"
         style={styles.map}
         showsUserLocation={true}
-        followsUserLocation={true}
+        followsUserLocation={false}
+        onPanDrag={() => setIsMapTouched(true)}
       >
         {location && (
           <Marker
@@ -226,33 +271,123 @@ export default function App() {
           />
         )}
 
-        <Marker coordinate={DESTINATION} title="Destination" pinColor="red" />
+        {[
+          {
+            id: 'danger1',
+            center: DESTINATION,
+            radius: 300,
+            title: 'You are on the danger zone area',
+            color: 'red',
+          },
+          {
+            id: 'danger2',
+            center: {
+              latitude: 14.667098449216025,
+              longitude: 121.05860074237758,
+            },
+            radius: 120,
+            title: 'You are on the danger zone area',
+            color: 'red',
+          },
+          {
+            id: 'danger3',
+            center: {
+              latitude: 7.91875575335728,
+              longitude: 125.09193397771749,
+            },
+            radius: 150, // Or adjust based on your desired alert range
+            title: 'You are on the danger zone area',
+            color: 'red',
+          },
+          {
+            id: 'police1',
+            center: {
+              latitude: 14.66793258010444,
+              longitude: 121.0566681907873,
+            },
+            radius: 120,
+            title: 'Police Area',
+            color: 'blue',
+          },
+        ].map((zone) => {
+          let inside = false;
+          if (location) {
+            const lat1 = location.coords.latitude;
+            const lon1 = location.coords.longitude;
+            const lat2 = zone.center.latitude;
+            const lon2 = zone.center.longitude;
+            const radius = zone.radius;
 
-        <Circle
-          center={DESTINATION}
-          radius={300}
-          strokeColor="rgba(255, 0, 0, 0.5)"
-          fillColor="rgba(255, 0, 0, 0.2)"
-        />
+            const R = 6371e3;
+            const φ1 = (lat1 * Math.PI) / 180;
+            const φ2 = (lat2 * Math.PI) / 180;
+            const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+            const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-        <Marker
-          coordinate={{
-            latitude: 14.66793258010444,
-            longitude: 121.0566681907873,
-          }}
-          title="Police Checkpoint"
-          pinColor="blue"
-        />
+            const a =
+              Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
 
-        <Circle
-          center={{
-            latitude: 14.66793258010444,
-            longitude: 121.0566681907873,
-          }}
-          radius={120} // adjust as needed
-          strokeColor="rgba(0, 0, 255, 0.5)"
-          fillColor="rgba(0, 0, 255, 0.2)"
-        />
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+
+            inside = distance <= radius;
+          }
+
+          return (
+            <React.Fragment key={zone.id}>
+              <Circle
+                center={zone.center}
+                radius={zone.radius}
+                strokeColor={
+                  zone.color === 'red'
+                    ? 'rgba(255, 0, 0, 0.5)'
+                    : 'rgba(0, 0, 255, 0.5)'
+                }
+                fillColor={
+                  zone.color === 'red'
+                    ? 'rgba(255, 0, 0, 0.2)'
+                    : 'rgba(0, 0, 255, 0.2)'
+                }
+              />
+
+              {inside && (
+                <>
+                  <Marker
+                    coordinate={zone.center}
+                    title={zone.title}
+                    pinColor={zone.color}
+                  />
+                  {(() => {
+                    if (!hasAlertedZone.current[zone.id]) {
+                      hasAlertedZone.current[zone.id] = true;
+
+                      // Toast + Vibration
+                      Toast.show(zone.title, {
+                        duration: Toast.durations.LONG,
+                        position: Toast.positions.TOP,
+                        shadow: true,
+                        animation: true,
+                        hideOnPress: true,
+                        delay: 0,
+                      });
+
+                      Vibration.vibrate([500, 300, 500]);
+                    }
+                    return null;
+                  })()}
+                </>
+              )}
+
+              {!inside &&
+                hasAlertedZone.current[zone.id] &&
+                (() => {
+                  hasAlertedZone.current[zone.id] = false;
+                  return null;
+                })()}
+            </React.Fragment>
+          );
+        })}
 
         {routeCoords.length > 0 && (
           <Polyline
@@ -310,21 +445,8 @@ export default function App() {
         <Ionicons name="search" size={24} color="#fff" />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.searchLocationButton}
-        onPress={handleSearchLocation}
-      >
-        <Ionicons name="locate" size={24} color="#fff" />
-      </TouchableOpacity>
-
       {showGuide && (
         <View style={styles.guideLabel}>
-          <View style={styles.guideItem}>
-            <View
-              style={[styles.colorIndicator, { backgroundColor: 'green' }]}
-            />
-            <Text style={styles.guideText}>Safe Zone</Text>
-          </View>
           <View style={styles.guideItem}>
             <View style={[styles.colorIndicator, { backgroundColor: 'red' }]} />
             <Text style={styles.guideText}>Danger Zone</Text>
@@ -512,5 +634,22 @@ const styles = StyleSheet.create({
     right: 10,
     padding: 4,
     zIndex: 10,
+  },
+
+  debugOverlay: {
+    position: 'absolute',
+    bottom: 140,
+    left: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 10,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
+
+  debugText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'monospace',
   },
 });
