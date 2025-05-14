@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import MapView, { Marker, Circle, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   StyleSheet,
@@ -12,27 +12,173 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import PolylineDecoder from 'polyline';
+
+const DESTINATION = {
+  latitude: 14.672715587849698,
+  longitude: 121.04974424012727,
+};
+
+const GOOGLE_MAPS_APIKEY = 'AIzaSyDh6wi3p0202wNefUBK_tEXjwUwhnx9yz4'; // Replace if needed
 
 export default function App() {
   const router = useRouter();
   const [showGuide, setShowGuide] = useState(false);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-600)).current;
+  const mapRef = useRef<MapView>(null);
+  const [searchText, setSearchText] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const requestLocationPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Permission to access location was denied');
-      console.error('Permission to access location was denied', errorMsg);
-      Alert.alert(
-        'Location Permission',
-        'Permission to access location was denied.'
-      );
+      Alert.alert('Location Permission', errorMsg || 'Permission denied');
       return false;
     }
     return true;
+  };
+
+  const fetchSuggestions = async (input: string) => {
+    if (!input) {
+      setSuggestions([]);
+      return;
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+      input
+    )}&key=${GOOGLE_MAPS_APIKEY}`;
+
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status === 'OK') {
+        setSuggestions(json.predictions);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Autocomplete error:', error);
+      setSuggestions([]);
+    }
+  };
+
+  const handlePlaceSelect = async (placeId: string) => {
+    setSuggestions([]);
+    const geoUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_MAPS_APIKEY}`;
+
+    try {
+      const geoRes = await fetch(geoUrl);
+      const geoJson = await geoRes.json();
+      const locationData = geoJson.result.geometry.location;
+
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+
+      await getRouteDirections(
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude,
+        locationData.lat,
+        locationData.lng
+      );
+
+      followUser();
+    } catch (err) {
+      console.error('Place selection error:', err);
+      Alert.alert('Failed to find location');
+    }
+  };
+
+  const getRouteDirections = async (
+    originLat: number,
+    originLng: number,
+    destLat: number,
+    destLng: number
+  ) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${originLat},${originLng}&destination=${destLat},${destLng}&mode=walking&key=${GOOGLE_MAPS_APIKEY}`;
+      const response = await fetch(url);
+      const json = await response.json();
+
+      if (json.routes.length) {
+        const points = PolylineDecoder.decode(
+          json.routes[0].overview_polyline.points
+        );
+        const routeCoordinates = points.map(
+          ([latitude, longitude]: number[]) => ({
+            latitude,
+            longitude,
+          })
+        );
+        setRouteCoords(routeCoordinates);
+      }
+    } catch (err) {
+      console.error('Error fetching directions', err);
+    }
+  };
+
+  const followUser = async () => {
+    const hasPermission = await requestLocationPermission();
+    if (!hasPermission) return;
+
+    await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (loc) => {
+        setLocation(loc);
+        mapRef.current?.animateCamera({
+          center: {
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          },
+          pitch: 0,
+          zoom: 18,
+        });
+      }
+    );
+  };
+
+  const handleDestinationSearch = async (address: string) => {
+    const hasPermission = await requestLocationPermission();
+    if (!hasPermission || !address) return;
+
+    try {
+      const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        address
+      )}&key=${GOOGLE_MAPS_APIKEY}`;
+      const geoRes = await fetch(geoUrl);
+      const geoJson = await geoRes.json();
+
+      if (!geoJson.results.length) {
+        Alert.alert('Location not found');
+        return;
+      }
+
+      const dest = geoJson.results[0].geometry.location;
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+
+      await getRouteDirections(
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude,
+        dest.lat,
+        dest.lng
+      );
+
+      followUser();
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      Alert.alert('Failed to find location');
+    }
   };
 
   const handleSearchLocation = async () => {
@@ -41,6 +187,13 @@ export default function App() {
 
     let currentLocation = await Location.getCurrentPositionAsync({});
     setLocation(currentLocation);
+    getRouteDirections(
+      currentLocation.coords.latitude,
+      currentLocation.coords.longitude,
+      DESTINATION.latitude,
+      DESTINATION.longitude
+    );
+    followUser();
   };
 
   const toggleInput = () => {
@@ -61,28 +214,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-    })();
+    handleSearchLocation();
   }, []);
 
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         provider="google"
-        initialRegion={{
-          latitude: 14.672094,
-          longitude: 121.050389,
-          latitudeDelta: 0.0001,
-          longitudeDelta: 0.0001,
-        }}
         style={styles.map}
         showsUserLocation={true}
         followsUserLocation={true}
@@ -93,22 +232,28 @@ export default function App() {
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
             }}
-            title="You are here"
+            title="You"
           />
         )}
 
+        <Marker coordinate={DESTINATION} title="Destination" pinColor="red" />
+
         <Circle
-          center={{
-            latitude: 14.672715587849698,
-            longitude: 121.04974424012727,
-          }}
-          radius={300} // Increased radius to 1000 meters
-          strokeColor="rgba(255, 0, 0, 0.5)" // Red border with transparency
-          fillColor="rgba(255, 0, 0, 0.2)" // Red fill with transparency
+          center={DESTINATION}
+          radius={300}
+          strokeColor="rgba(255, 0, 0, 0.5)"
+          fillColor="rgba(255, 0, 0, 0.2)"
         />
+
+        {routeCoords.length > 0 && (
+          <Polyline
+            coordinates={routeCoords}
+            strokeWidth={5}
+            strokeColor="#DA549B"
+          />
+        )}
       </MapView>
 
-      {/* Sliding Input */}
       <Animated.View
         style={[
           styles.inputContainer,
@@ -118,16 +263,30 @@ export default function App() {
         <TextInput
           style={styles.textInput}
           placeholder="Enter location"
-          onSubmitEditing={(event) => console.log(event.nativeEvent.text)}
+          value={searchText}
+          onChangeText={(text) => {
+            setSearchText(text);
+            fetchSuggestions(text);
+          }}
         />
+        {suggestions.map((item) => (
+          <TouchableOpacity
+            key={item.place_id}
+            onPress={() => {
+              setSearchText(item.description);
+              handlePlaceSelect(item.place_id);
+            }}
+            style={styles.suggestionItem}
+          >
+            <Text>{item.description}</Text>
+          </TouchableOpacity>
+        ))}
       </Animated.View>
 
-      {/* Search Button */}
       <TouchableOpacity style={styles.searchButtonLeft} onPress={toggleInput}>
         <Ionicons name="search" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {/* Search Location Button */}
       <TouchableOpacity
         style={styles.searchLocationButton}
         onPress={handleSearchLocation}
@@ -155,6 +314,7 @@ export default function App() {
           </View>
         </View>
       )}
+
       <TouchableOpacity
         style={styles.guideButton}
         onPress={() => setShowGuide(!showGuide)}
@@ -162,7 +322,6 @@ export default function App() {
         <Ionicons name="help-circle" size={32} color="#DA549B" />
       </TouchableOpacity>
 
-      {/* Bottom Nav */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
@@ -178,10 +337,7 @@ export default function App() {
           <MaterialIcons name="sos" size={24} color="gray" />
           <Text style={styles.navText}>SOS</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push('/app/navigation')}
-        >
+        <TouchableOpacity style={styles.navItem}>
           <Ionicons name="compass" size={24} color="#DA549B" />
           <Text style={styles.navTextActive}>Explore</Text>
         </TouchableOpacity>
@@ -307,5 +463,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     color: '#DA549B',
+  },
+  suggestionItem: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
   },
 });

@@ -28,7 +28,7 @@ export default function SosScreen() {
 
   const playSosSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
-      require('@/assets/audio/sos.mp3'),
+      require('@/assets/audio/iphone.mp3'),
       { shouldPlay: true, volume: 0.1, isLooping: true }
     );
     soundRef.current = sound;

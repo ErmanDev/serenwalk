@@ -1,16 +1,25 @@
 {
   "build": {
-    "release": {
-      "distribution": "internal",
+    "preview": {
       "android": {
         "buildType": "apk"
       }
     },
-    "production": {
-      "distribution": "store",
+    "preview2": {
       "android": {
-        "buildType": "app-bundle"
+        "gradleCommand": ":app:assembleRelease"
       }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
+      "distribution": "internal"
+    },
+    "production": {
+        "env": {
+      "MAPBOX_DOWNLOADS_TOKEN": "pk.eyJ1IjoiZXJtYW4tbmFtcmUiLCJhIjoiY21hbjdxZm1qMHRzNjJzcTBudm5iZWlxeCJ9.xMkBJqVQgsFABJo7YoqTjA"
+    }
     }
   }
 }
