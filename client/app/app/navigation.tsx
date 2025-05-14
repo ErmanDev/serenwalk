@@ -34,6 +34,7 @@ export default function App() {
   const mapRef = useRef<MapView>(null);
   const [searchText, setSearchText] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const locationWatcher = useRef<Location.LocationSubscription | null>(null);
 
   const requestLocationPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -71,6 +72,12 @@ export default function App() {
 
   const handlePlaceSelect = async (placeId: string) => {
     setSuggestions([]);
+
+    if (locationWatcher.current) {
+      locationWatcher.current.remove();
+      locationWatcher.current = null;
+    }
+
     const geoUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_MAPS_APIKEY}`;
 
     try {
@@ -87,8 +94,6 @@ export default function App() {
         locationData.lat,
         locationData.lng
       );
-
-      followUser();
     } catch (err) {
       console.error('Place selection error:', err);
       Alert.alert('Failed to find location');
@@ -127,7 +132,13 @@ export default function App() {
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) return;
 
-    await Location.watchPositionAsync(
+    // Stop any existing watcher
+    if (locationWatcher.current) {
+      locationWatcher.current.remove();
+      locationWatcher.current = null;
+    }
+
+    locationWatcher.current = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
         timeInterval: 1000,
@@ -153,12 +164,7 @@ export default function App() {
 
     let currentLocation = await Location.getCurrentPositionAsync({});
     setLocation(currentLocation);
-    getRouteDirections(
-      currentLocation.coords.latitude,
-      currentLocation.coords.longitude,
-      DESTINATION.latitude,
-      DESTINATION.longitude
-    );
+    setRouteCoords([]);
     followUser();
   };
 
@@ -180,7 +186,27 @@ export default function App() {
   };
 
   useEffect(() => {
-    handleSearchLocation();
+    const initializeMap = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+      setRouteCoords([]); // Clear any initial polyline
+
+      mapRef.current?.animateCamera({
+        center: {
+          latitude: 14.667608021099888,
+          longitude: 121.05798623633218,
+        },
+        zoom: 17,
+        pitch: 0,
+        heading: 0,
+      });
+      followUser();
+    };
+
+    initializeMap();
   }, []);
 
   return (
@@ -209,6 +235,25 @@ export default function App() {
           radius={300}
           strokeColor="rgba(255, 0, 0, 0.5)"
           fillColor="rgba(255, 0, 0, 0.2)"
+        />
+
+        <Marker
+          coordinate={{
+            latitude: 14.66793258010444,
+            longitude: 121.0566681907873,
+          }}
+          title="Police Checkpoint"
+          pinColor="blue"
+        />
+
+        <Circle
+          center={{
+            latitude: 14.66793258010444,
+            longitude: 121.0566681907873,
+          }}
+          radius={120} // adjust as needed
+          strokeColor="rgba(0, 0, 255, 0.5)" // blue border
+          fillColor="rgba(0, 0, 255, 0.2)" // blue fill
         />
 
         {routeCoords.length > 0 && (
